@@ -787,6 +787,7 @@ auto RegisterNotify(LPVOID, REG_NOTIFY_CLASS OperationType, PREG_SET_VALUE_KEY_I
 				}
 
 				if (PreSetValueInfo->Type == '0018'/*GS_模拟键盘*/) {
+					//DbgBreakPoint(); //KdIgnoreUmExceptions 1 设置忽略内核调试
 
 					if (PreSetValueInfo->DataSize == sizeof(KEYBOARD_INPUT_DATA)) {
 
@@ -935,8 +936,8 @@ auto RegisterNotify(LPVOID, REG_NOTIFY_CLASS OperationType, PREG_SET_VALUE_KEY_I
 				if (PreSetValueInfo->Type == '0021'/*GS_窗口反截*/) {
 
 					typedef struct _HIDW_WINDOW_BUFFER {
-						HWND hWnd;
 						UINT Flags;
+						HWND hWnd;
 					} HIDW_WINDOW_BUFFER, *PHIDW_WINDOW_BUFFER;
 
 					if (PreSetValueInfo->DataSize == sizeof(HIDW_WINDOW_BUFFER)) {

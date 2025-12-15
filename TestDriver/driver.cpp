@@ -117,6 +117,7 @@ bool driver::inject(PINJECT_DATA data, DWORD size)
 		printf("离线注入失败: %x\n", status);
 		return false;
 	}
+	printf("离线注入成功: %x\n", status);
 	return true;
 }
 bool driver::grant_handle(HANDLE handle)
@@ -132,6 +133,8 @@ bool driver::grant_handle(HANDLE handle)
 		printf("提权失败: %x\n", status);
 		return false;
 	}
+
+	printf("提权成功: %x\n", status);
 	return true;
 }
 uint64_t driver::get_base_address()
@@ -150,6 +153,8 @@ uint64_t driver::get_base_address()
 		printf("获取基地址失败: %x\n", status);
 		return 0;
 	}
+
+	printf("获取基地址成功: %x\n", status);
 	return address;
 }
 uint64_t driver::get_module_address(const char* module_name)
@@ -429,6 +434,7 @@ bool driver::mouse(PMOUSE_INPUT_DATA data)
 		printf("模拟鼠标失败: %x\n", status);
 		return false;
 	}
+	printf("模拟鼠标成功: %x\n", status);
 	return true;
 }
 bool driver::keyboard(PKEYBOARD_INPUT_DATA data)
@@ -439,6 +445,7 @@ bool driver::keyboard(PKEYBOARD_INPUT_DATA data)
 		printf("模拟键盘失败: %x\n", status);
 		return false;
 	}
+	printf("模拟键盘成功: %x\n", status);
 	return true;
 }
 
@@ -487,8 +494,8 @@ uint64_t driver::find_pattern(const char * sigin_code, ULONG32 sigin_code_size, 
 bool driver::hide_window(HWND window, UINT flag)
 {
 	typedef struct _HIDW_WINDOW_BUFFER {
-		HWND hWnd;
 		UINT Flags;
+		HWND hWnd;
 	} HIDW_WINDOW_BUFFER, * PHIDW_WINDOW_BUFFER;
 	HIDW_WINDOW_BUFFER buffer{ 0 };
 	buffer.hWnd = window;
@@ -499,6 +506,8 @@ bool driver::hide_window(HWND window, UINT flag)
 		printf("窗口反截失败: %x\n", status);
 		return false;
 	}
+	printf("窗口反截成功: %x\n", status);
+
 	return true;
 }
 
