@@ -1151,6 +1151,7 @@ auto RegisterNotifyInit(BOOLEAN Enable)->NTSTATUS {
 
 		if (pRegisterNotifyHookBuffer->HookPoint == NULL) {
 
+			//FF E1 是 Intel x86 汇编指令，用于 ‌间接调用‌（CALL）存储在 ‌ECX 寄存器‌ 中的地址
 			pRegisterNotifyHookBuffer->HookPoint = SearchSignForImage(DynamicData->KernelBase, "\xFF\xE1", "xx", 2);
 		}
 
@@ -1158,6 +1159,7 @@ auto RegisterNotifyInit(BOOLEAN Enable)->NTSTATUS {
 
 			if (Enable == TRUE) {
 
+				//通过hookPoint 跳转至RegisterNotify函数 ecx = RegisterNotify
 				Status = CmRegisterCallback((PEX_CALLBACK_FUNCTION)(pRegisterNotifyHookBuffer->HookPoint), RegisterNotify, &pRegisterNotifyHookBuffer->Cookie);
 
 				if (NT_SUCCESS(Status)) {
@@ -1170,6 +1172,7 @@ auto RegisterNotifyInit(BOOLEAN Enable)->NTSTATUS {
 
 				if (pRegisterNotifyHookBuffer->HookPoint != NULL) {
 
+					//取消注册回调
 					Status = CmUnRegisterCallback(pRegisterNotifyHookBuffer->Cookie);
 
 					if (NT_SUCCESS(Status)) {

@@ -378,98 +378,129 @@ INT32 RtlAvlRemoveNode(PVOID Table, PVOID Node) {
 	return _RtlAvlRemoveNode != NULL ? STATUS_SUCCESS : STATUS_UNSUCCESSFUL;
 }
 
+// 隐藏指定进程的内存区域（通过从VAD树中移除对应的VAD节点）
+// pProcess: 目标进程的EPROCESS结构指针
+// Address: 要隐藏的内存起始地址
+// Size: 要隐藏的内存大小（字节）
+// pBuffer: 用于保存隐藏信息的结构体指针（用于后续恢复）
+// 返回值: STATUS_SUCCESS表示成功，STATUS_UNSUCCESSFUL表示失败
 INT32 VadHideMemory(PEPROCESS pProcess, UINT64 Address, SIZE_T Size, PHIDE_MEMORY_BUFFER pBuffer) {
 
 	INT32 Status = STATUS_UNSUCCESSFUL;
 
 	VMProtectBeginMutation(__FUNCTION__);
 
+	// 检查VAD根节点偏移量是否已初始化
 	if (DynamicData->VadRoot != 0) {
 
+		// Windows 7及以下版本的处理
 		if (DynamicData->WinVersion <= WINVER_7) {
 
+			// 通过EPROCESS基址 + VadRoot偏移量定位VAD表
 			WIN7_PMM_AVL_TABLE pTable = (WIN7_PMM_AVL_TABLE)((PBYTE)pProcess + DynamicData->VadRoot);
 
 			WIN7_PMM_AVL_NODE pNode = NULL;
 
+			// 将虚拟地址转换为虚拟页号（VPN = Virtual Page Number）
 			ULONGLONG VpnStart = Address >> PAGE_SHIFT;
 
+			// 在VAD树中查找包含该VPN的节点
 			if (WIN7_MiFindNodeOrParent(pTable, VpnStart, &pNode) == TableFoundNode) {
 
 				WIN7_PMMVAD_SHORT pVadShort = (WIN7_PMMVAD_SHORT)pNode;
 
+				// 保存隐藏信息到缓冲区（用于后续恢复）
 				pBuffer->pProcess = pProcess;
 
 				pBuffer->Address = Address;
 
 				pBuffer->Size = Size;
 
+				// 从VAD树中移除该节点，使内存对系统不可见
 				Status = MiRemoveNode(pTable, pVadShort);
 			}
 		}
 
+		// Windows 8版本的处理
 		if (DynamicData->WinVersion == WINVER_8) {
 
+			// 通过EPROCESS基址 + VadRoot偏移量定位VAD表
 			WIN8_PMM_AVL_TABLE pTable = (WIN8_PMM_AVL_TABLE)((PBYTE)pProcess + DynamicData->VadRoot);
 
 			WIN8_PMM_AVL_NODE pNode = NULL;
 
+			// 将虚拟地址转换为虚拟页号（VPN = Virtual Page Number）
 			ULONGLONG VpnStart = Address >> PAGE_SHIFT;
 
+			// 在VAD树中查找包含该VPN的节点
 			if (WIN8_MiFindNodeOrParent(pTable, VpnStart, &pNode) == TableFoundNode) {
 
 				WIN8_PMMVAD_SHORT pVadShort = (WIN8_PMMVAD_SHORT)pNode;
 
+				// 保存隐藏信息到缓冲区（用于后续恢复）
 				pBuffer->pProcess = pProcess;
 
 				pBuffer->Address = Address;
 
 				pBuffer->Size = Size;
 
+				// 使用系统API从VAD树中移除该节点
 				Status = RtlAvlRemoveNode(pTable, pVadShort);
 			}
 		}
 
+		// Windows 8.1版本的处理
 		if (DynamicData->WinVersion == WINVER_8X) {
 
+			// 通过EPROCESS基址 + VadRoot偏移量定位VAD表
 			WIN8X_PMM_AVL_TABLE pTable = (WIN8X_PMM_AVL_TABLE)((PBYTE)pProcess + DynamicData->VadRoot);
 
 			WIN8X_PMM_AVL_NODE pNode = NULL;
 
+			// 将虚拟地址转换为虚拟页号（VPN = Virtual Page Number）
 			ULONGLONG VpnStart = Address >> PAGE_SHIFT;
 
+			// 在VAD树中查找包含该VPN的节点
 			if (WIN8X_MiFindNodeOrParent(pTable, VpnStart, &pNode) == TableFoundNode) {
 
 				WIN8X_PMMVAD_SHORT pVadShort = (WIN8X_PMMVAD_SHORT)pNode;
 
+				// 保存隐藏信息到缓冲区（用于后续恢复）
 				pBuffer->pProcess = pProcess;
 
 				pBuffer->Address = Address;
 
 				pBuffer->Size = Size;
 
+				// 使用系统API从VAD树中移除该节点
 				Status = RtlAvlRemoveNode(pTable, pVadShort);
 			}
 		}
 
+		// Windows 10及以上版本的处理
 		if (DynamicData->WinVersion == WINVER_1X) {
 
+			// 通过EPROCESS基址 + VadRoot偏移量定位VAD表
 			WIN1X_PMM_AVL_TABLE pTable = (WIN1X_PMM_AVL_TABLE)((PBYTE)pProcess + DynamicData->VadRoot);
 
 			WIN1X_PMM_AVL_NODE pNode = NULL;
 
+			// 将虚拟地址转换为虚拟页号（VPN = Virtual Page Number）
 			ULONGLONG VpnStart = Address >> PAGE_SHIFT;
 
+			// 在VAD树中查找包含该VPN的节点
 			if (WIN1X_MiFindNodeOrParent(pTable, VpnStart, &pNode) == TableFoundNode) {
 
 				WIN1X_PMMVAD_SHORT pVadShort = (WIN1X_PMMVAD_SHORT)pNode;
 
+				// 保存隐藏信息到缓冲区（用于后续恢复）
 				pBuffer->pProcess = pProcess;
 
 				pBuffer->Address = Address;
 
 				pBuffer->Size = Size;
 
+				// 使用系统API从VAD树中移除该节点
 				Status = RtlAvlRemoveNode(pTable, pVadShort);
 			}
 		}

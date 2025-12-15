@@ -70,7 +70,7 @@ static bool RegisterAndStart(const std::wstring& driver_path) {
 
 	return NT_SUCCESS(Status);
 }
-
+//一个简化的“内存→文件”工具函数，调用者传入目标路径、源内存首地址和字节大小，返回布尔值表示写入是否成功。
 static bool CreateFileFromMemory(const std::wstring& desired_file_path, const char* address, size_t size) {
 	std::ofstream file_ofstream(desired_file_path.c_str(), std::ios_base::out | std::ios_base::binary);
 
@@ -130,7 +130,7 @@ static HANDLE Load() {
 		Log(L"[-] Can't find TEMP folder" << std::endl);
 		return INVALID_HANDLE_VALUE;
 	}
-
+	//删除临时文件
 	_wremove(driver_path.c_str());
 
 	if (!CreateFileFromMemory(driver_path, reinterpret_cast<const char*>(driver_data), sizeof(driver_data))) {
