@@ -65,13 +65,29 @@ bool driver::attach(const wchar_t* process_name)
 NTSTATUS driver::call(DWORD type, void* data, DWORD size)
 {
 	HKEY hKey = NULL;
-	RegOpenKeyExA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Clipboard", 0, KEY_ALL_ACCESS, &hKey);
+	LONG status = RegOpenKeyExA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Clipboard", 0, KEY_ALL_ACCESS, &hKey);
 
-	if (hKey == NULL || hKey == INVALID_HANDLE_VALUE) {
-		printf("Registry error\n");
-		return 1;
+	if (status != ERROR_SUCCESS || hKey == NULL) {
+		printf("Registry open error: %ld\n", status);
+		return ERROR_失败;
 	}
-	return RegSetValueExA(hKey, "DisableAntiSpyware", 0, type, reinterpret_cast<const BYTE*>(data), size);
+
+	// 写入注册表值以触发内核回调
+	status = RegSetValueExA(hKey, "DisableAntiSpyware", 0, type, reinterpret_cast<const BYTE*>(data), size);
+	
+	// 关闭注册表句柄，防止资源泄漏
+	RegCloseKey(hKey);
+
+	// 如果写入失败，返回错误
+	if (status != ERROR_SUCCESS) {
+		printf("Registry set value error: %ld\n", status);
+		return ERROR_失败;
+	}
+
+	// 写入成功，返回成功状态
+	// 注意：内核回调的实际状态码可能需要通过其他机制获取
+	// 当前实现假设如果注册表写入成功，内核处理也成功
+	return ERROR_成功;
 }
 bool driver::test()
 {
