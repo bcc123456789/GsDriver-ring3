@@ -77,7 +77,7 @@ auto DriverStart()->NTSTATUS {
 
 	return Status;
 }
-
+//Ò³±í³õÊ¼»¯
 auto GetPteTable(PBYTE pBuffer[]) -> NTSTATUS {
 
 	NTSTATUS Result = STATUS_SUCCESS;
